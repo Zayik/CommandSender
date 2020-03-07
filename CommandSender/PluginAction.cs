@@ -39,6 +39,8 @@ namespace CommandSender
 
         private PluginSettings settings;
 
+        private UdpClient udpClient;
+
         #endregion
         public PluginAction(SDConnection connection, InitialPayload payload) : base(connection, payload)
         {
@@ -50,11 +52,14 @@ namespace CommandSender
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
+            udpClient = new UdpClient();
         }
 
         public override void Dispose()
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, $"Destructor called");
+            udpClient.Close();
+            udpClient.Dispose();
         }
 
         public override void KeyPressed(KeyPayload payload)
@@ -62,16 +67,12 @@ namespace CommandSender
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
 
             byte[] data = Encoding.ASCII.GetBytes("Hello World");
-            string ipAddress = "127.0.0.1";
-            int sendPort = 55600;
+
             try
             {
-                using(var client = new UdpClient())
-                {
-                    IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ipAddress), sendPort);
-                    client.Connect(ep);
-                    client.Send(data, data.Length);
-                }
+                IPEndPoint ep = new IPEndPoint(IPAddress.Parse(settings.IPAddress), settings.Port);
+                udpClient.Connect(ep);
+                udpClient.Send(data, data.Length);
             }
             catch(Exception ex)
             {
