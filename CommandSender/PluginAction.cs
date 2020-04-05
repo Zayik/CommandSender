@@ -31,8 +31,11 @@ namespace CommandSender
             [JsonProperty(PropertyName = "port")]
             public int Port { get; set; }
 
-            [JsonProperty(PropertyName = "command")]
-            public string Command { get; set; }
+            [JsonProperty(PropertyName = "commandPressed")]
+            public string CommandPressed { get; set; }
+
+            [JsonProperty(PropertyName = "commandReleased")]
+            public string CommandReleased { get; set; }
         }
 
         #region Private Members
@@ -66,7 +69,7 @@ namespace CommandSender
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
 
-            byte[] data = Encoding.ASCII.GetBytes("Hello World");
+            byte[] data = Encoding.ASCII.GetBytes(settings.CommandPressed);
 
             try
             {
@@ -80,7 +83,25 @@ namespace CommandSender
             }
         }
 
-        public override void KeyReleased(KeyPayload payload) { }
+        public override void KeyReleased(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
+            if(!string.IsNullOrEmpty(settings.CommandPressed))
+            {
+                byte[] data = Encoding.ASCII.GetBytes(settings.CommandReleased);
+
+                try
+                {
+                    IPEndPoint ep = new IPEndPoint(IPAddress.Parse(settings.IPAddress), settings.Port);
+                    udpClient.Connect(ep);
+                    udpClient.Send(data, data.Length);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+        }
 
         public override void OnTick() { }
 

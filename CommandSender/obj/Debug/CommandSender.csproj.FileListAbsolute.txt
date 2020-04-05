@@ -32,3 +32,4 @@ E:\Users\Zayik\source\repos\CommandSender\CommandSender\bin\Debug\com.CommandSen
 E:\Users\Zayik\source\repos\CommandSender\CommandSender\bin\Debug\com.CommandSender.sdPlugin\com.biffmasterzay.commandsender.pdb
 E:\Users\Zayik\source\repos\CommandSender\CommandSender\obj\Debug\com.biffmasterzay.commandsender.exe
 E:\Users\Zayik\source\repos\CommandSender\CommandSender\obj\Debug\com.biffmasterzay.commandsender.pdb
+E:\Users\Zayik\source\repos\CommandSender\CommandSender\obj\Debug\CommandSender.csprojAssemblyReference.cache
