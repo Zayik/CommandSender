@@ -12,3 +12,6 @@
 	Port: #
 	Command Pressed: The message/command to send to the server on key press.
 	Command Released: The message/command to send to the server on key release.
+
+# Test
+ The UDPListener located at https://github.com/Zayik/UDPListener can be used to test if the plugin buttons are sending commands. 
