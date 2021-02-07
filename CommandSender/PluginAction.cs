@@ -69,24 +69,27 @@ namespace CommandSender
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
 
-            byte[] data = Encoding.ASCII.GetBytes(settings.CommandPressed);
+            if(!string.IsNullOrEmpty(settings.CommandPressed))
+            {
+                byte[] data = Encoding.ASCII.GetBytes(settings.CommandPressed);
 
-            try
-            {
-                IPEndPoint ep = new IPEndPoint(IPAddress.Parse(settings.IPAddress), settings.Port);
-                udpClient.Connect(ep);
-                udpClient.Send(data, data.Length);
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
+                try
+                {
+                    IPEndPoint ep = new IPEndPoint(IPAddress.Parse(settings.IPAddress), settings.Port);
+                    udpClient.Connect(ep);
+                    udpClient.Send(data, data.Length);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
         }
 
         public override void KeyReleased(KeyPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
-            if(!string.IsNullOrEmpty(settings.CommandPressed))
+            if(!string.IsNullOrEmpty(settings.CommandReleased))
             {
                 byte[] data = Encoding.ASCII.GetBytes(settings.CommandReleased);
 
