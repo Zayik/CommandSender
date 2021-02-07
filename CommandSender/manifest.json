@@ -11,19 +11,19 @@
         }
       ],
       "SupportedInMultiActions": false,
-      "Tooltip": "Command Sender for sending commands to connected clients.",
+      "Tooltip": "Command Sender for sending commands to servers via udp.",
       "UUID": "com.biffmasterzay.commandsender",
       "PropertyInspectorPath": "PropertyInspector/PluginActionPI.html"
     }
   ],
   "Author": "BiffMasterZay",
   "Name": "CommandSender",
-  "Description": "Command Sender for sending commands to connected clients.",
+  "Description": "Command Sender for sending commands to servers via udp.",
   "Icon": "Images/pluginIcon",
-  "URL": "TODO_ENTER_YOUR_HOMEPAGE",
+  "URL": "https://www.elgato.com/gaming/stream-deck",
   "Version": "1.0",
   "CodePath": "com.biffmasterzay.commandsender",
-  "Category": "Custom",
+  "Category": "BiffMasterZay",
   "CategoryIcon": "Images/categoryIcon",
   "OS": [
     {
