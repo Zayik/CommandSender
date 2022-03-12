@@ -10,7 +10,7 @@
           "FontSize": "12"
         }
       ],
-      "SupportedInMultiActions": false,
+      "SupportedInMultiActions": true,
       "Tooltip": "Command Sender for sending commands to servers via udp.",
       "UUID": "com.biffmasterzay.commandsender",
       "PropertyInspectorPath": "PropertyInspector/PluginActionPI.html"
