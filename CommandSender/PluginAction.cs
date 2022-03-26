@@ -685,6 +685,7 @@ namespace CommandSender
             settings.CurrentState++;
             if(settings.CurrentState >= settings.DesiredStates)
                 settings.CurrentState = 0;
+            SetStateAsync((uint)settings.CurrentState);
         }
 
         public override void OnTick() { }
@@ -702,6 +703,11 @@ namespace CommandSender
         private Task SaveSettings()
         {
             return Connection.SetSettingsAsync(JObject.FromObject(settings));
+        }
+
+        private Task SetStateAsync(uint state)
+        {
+            return Connection.SetStateAsync(state);
         }
 
         #endregion
