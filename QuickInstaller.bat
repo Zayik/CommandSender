@@ -1,0 +1,1 @@
+.\CommandSender\bin\QuickInstaller.bat DEBUG com.biffmasterzay.commandsender

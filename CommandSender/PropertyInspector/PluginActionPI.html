@@ -13,21 +13,210 @@
 <body>
     <div class="sdpi-wrapper">
         <div class="sdpi-item" id="dvTitlePrefix">
-            <div class="sdpi-item-label">IP Address</div>
-            <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress" oninput="setSettings()">
+                <div class="sdpi-item-label">Desired States (Max 10)</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="1" value="1" id="desiredStates" min="1" max="10" pattern="[0-9]{1,2}" onchange="setdesiredState()">
+            </div>
+
+        <div id="State0">
+            <br>------------------------------State0------------------------------</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress0" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port0" onchange="validatePort(port0)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed0" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased0" oninput="setSettings()">
+            </div>
         </div>
-        <div class="sdpi-item" id="dvTitlePrefix">
-            <div class="sdpi-item-label">Port</div>
-            <input class="sdpi-item-value sdProperty" placeholder="45671" value="45671" id="port" oninput="setSettings()">
+        
+        <div id="State1" style="display: none">
+            <br>State1</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress1" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port1" onchange="validatePort(port1)"">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed1" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased1" oninput="setSettings()">
+            </div>
         </div>
-        <div class="sdpi-item" id="dvTitlePrefix">
-            <div class="sdpi-item-label">Command Pressed</div>
-            <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed" oninput="setSettings()">
+
+        <div id="State2" style="display: none">
+            <br>State2</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress2" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port2" onchange="validatePort(port2)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed2" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased2" oninput="setSettings()">
+            </div>
         </div>
-        <div class="sdpi-item" id="dvTitlePrefix">
-            <div class="sdpi-item-label">Command Released</div>
-            <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased" oninput="setSettings()">
+
+        <div id="State3" style="display: none">
+            <br>State3</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress3" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port3" onchange="validatePort(port3)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed3" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased3" oninput="setSettings()">
+            </div>
         </div>
+
+        <div id="State4" style="display: none">
+            <br>State4</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress4" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port4" onchange="validatePort(port4)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed4" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased4" oninput="setSettings()">
+            </div>
+        </div>
+
+        <div id="State5" style="display: none">
+            <br>State5</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress5" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port5" onchange="validatePort(port5)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed5" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased5" oninput="setSettings()">
+            </div>
+        </div>
+
+        <div id="State6" style="display: none">
+            <br>State6</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress6" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port6" onchange="validatePort(port6)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed6" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased6" oninput="setSettings()">
+            </div>
+        </div>
+
+        <div id="State7" style="display: none">
+            <br>State7</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress7" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port7" onchange="validatePort(port7)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed7" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased7" oninput="setSettings()">
+            </div>
+        </div>
+
+        <div id="State8" style="display: none">
+            <br>State8</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress8" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port8" onchange="validatePort(port8)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed8" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased8" oninput="setSettings()">
+            </div>
+        </div>
+
+        <div id="State9" style="display: none">
+            <br>State9</br>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">IP Address</div>
+                <input class="sdpi-item-value sdProperty" placeholder="127.0.0.1" value="127.0.0.1" id="ipAddress9" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Port</div>
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port9" onchange="validatePort(port9)">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Pressed</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandPressed" value="" id="commandPressed9" oninput="setSettings()">
+            </div>
+            <div class="sdpi-item" id="dvTitlePrefix">
+                <div class="sdpi-item-label">Command Released</div>
+                <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased9" oninput="setSettings()">
+            </div>
+        </div>
+
     </div>
 </body>
 </html>

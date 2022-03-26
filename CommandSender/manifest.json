@@ -20,7 +20,7 @@
   "Name": "CommandSender",
   "Description": "Command Sender for sending commands to servers via udp.",
   "Icon": "Images/pluginIcon",
-  "URL": "https://www.elgato.com/gaming/stream-deck",
+  "URL": "https://github.com/Zayik/CommandSender",
   "Version": "1.0",
   "CodePath": "com.biffmasterzay.commandsender",
   "Category": "BiffMasterZay",
