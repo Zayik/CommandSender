@@ -55,6 +55,7 @@ function websocketOnMessage(evt) {
     }
 }
 
+var loadConfigurationEvent = null
 function loadConfiguration(payload) {
     console.log('loadConfiguration');
     console.log(payload);
@@ -96,6 +97,10 @@ function loadConfiguration(payload) {
             console.log("loadConfiguration failed for key: " + key + " - " + err);
         }
     }
+    if(loadConfigurationEvent !== null) {
+        loadConfigurationEvent();
+    }
+        
 }
 
 function setSettings() {

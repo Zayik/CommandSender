@@ -1,19 +1,13 @@
-﻿// sdtools.common.js v1.0
-var websocket = null,
-    uuid = null,
-    registerEventName = null,
-    actionInfo = {},
-    inInfo = {},
-    runningApps = [],
-    isQT = navigator.appVersion.includes('QtWebEngine');
-
-function setdesiredState() {
+﻿function setdesiredState() {
     var ele = document.getElementById("desiredStates");
     if (ele.value > 10)
         ele.value = 10;
     else if (ele.value <= 0)
         ele.value = 1;
-    updateStateVisibilityOnChange()
+
+    //This is no longer needed since our configurations will be reloaded, thus causing the update to be called 
+    //when the loadConfigurationEvent is executed from loadConfiguration.
+    //updateStateVisibilityOnChange()
 
     setSettings()
 }
@@ -39,3 +33,6 @@ function validatePort(eleId) {
         eleId.value = eleId.placeholder;
     setSettings();
 }
+
+// This is required in order to tell the presentation to update visible states based on configurations when first loading. 
+loadConfigurationEvent = updateStateVisibilityOnChange
