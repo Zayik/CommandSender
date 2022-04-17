@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("streamdeck-streamcounter")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("streamdeck-commandsender")]
+[assembly: AssemblyDescription("Sends a message to server via udp/tcp.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("streamdeck-streamcounter")]
+[assembly: AssemblyProduct("streamdeck-commandsender")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -15,6 +15,8 @@ namespace CommandSender
     [PluginActionId("com.biffmasterzay.commandsender")]
     public class PluginAction : PluginBase
     {
+        
+
         readonly static int MAXSTATES = 10;
         private class PluginSettings
         {
@@ -42,27 +44,28 @@ namespace CommandSender
 
             List<CommandAction> commands = new List<CommandAction>(10);
 
+            Dictionary<string, TcpClient> tcpClients = new Dictionary<string, TcpClient>();
+
             public int CurrentState = 0;
             public CommandAction CurrentCommandAction { get { return commands[CurrentState]; } }
 
             [JsonProperty(PropertyName = "desiredStates")]
             public int DesiredStates { get; set; }
-            //{
-            //    get
-            //    {
-            //        return desiredStates;
-            //    }
-            //    set
-            //    {
-            //        if(value <= 0)
-            //            value = 1;
-            //        if(value > MAXSTATES)
-            //            value = MAXSTATES;
-            //        desiredStates = value;
-            //    }
-            //}
 
             #region State0
+            [JsonProperty(PropertyName = "communicationMode0")]
+            public CommunicationMode CommunicationMode0
+            {
+                get
+                {
+                    return commands[0].CommunicationMode;
+                }
+                set
+                {
+                    commands[0].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress0")]
             public string IPAddress0
             {
@@ -117,6 +120,19 @@ namespace CommandSender
             #endregion
 
             #region State1
+            [JsonProperty(PropertyName = "communicationMode1")]
+            public CommunicationMode CommunicationMode1
+            {
+                get
+                {
+                    return commands[1].CommunicationMode;
+                }
+                set
+                {
+                    commands[1].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress1")]
             public string IPAddress1
             {
@@ -171,6 +187,19 @@ namespace CommandSender
             #endregion
 
             #region State2
+            [JsonProperty(PropertyName = "communicationMode2")]
+            public CommunicationMode CommunicationMode2
+            {
+                get
+                {
+                    return commands[2].CommunicationMode;
+                }
+                set
+                {
+                    commands[2].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress2")]
             public string IPAddress2
             {
@@ -225,6 +254,19 @@ namespace CommandSender
             #endregion
 
             #region State3
+            [JsonProperty(PropertyName = "communicationMode3")]
+            public CommunicationMode CommunicationMode3
+            {
+                get
+                {
+                    return commands[3].CommunicationMode;
+                }
+                set
+                {
+                    commands[3].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress3")]
             public string IPAddress3
             {
@@ -279,6 +321,19 @@ namespace CommandSender
             #endregion
 
             #region State4
+            [JsonProperty(PropertyName = "communicationMode4")]
+            public CommunicationMode CommunicationMode4
+            {
+                get
+                {
+                    return commands[4].CommunicationMode;
+                }
+                set
+                {
+                    commands[4].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress4")]
             public string IPAddress4
             {
@@ -333,6 +388,19 @@ namespace CommandSender
             #endregion
 
             #region State5
+            [JsonProperty(PropertyName = "communicationMode5")]
+            public CommunicationMode CommunicationMode5
+            {
+                get
+                {
+                    return commands[5].CommunicationMode;
+                }
+                set
+                {
+                    commands[5].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress5")]
             public string IPAddress5
             {
@@ -387,6 +455,19 @@ namespace CommandSender
             #endregion
 
             #region State6
+            [JsonProperty(PropertyName = "communicationMode6")]
+            public CommunicationMode CommunicationMode6
+            {
+                get
+                {
+                    return commands[6].CommunicationMode;
+                }
+                set
+                {
+                    commands[6].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress6")]
             public string IPAddress6
             {
@@ -441,6 +522,19 @@ namespace CommandSender
             #endregion
 
             #region State7
+            [JsonProperty(PropertyName = "communicationMode7")]
+            public CommunicationMode CommunicationMode7
+            {
+                get
+                {
+                    return commands[7].CommunicationMode;
+                }
+                set
+                {
+                    commands[7].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress7")]
             public string IPAddress7
             {
@@ -495,6 +589,19 @@ namespace CommandSender
             #endregion
 
             #region State8
+            [JsonProperty(PropertyName = "communicationMode8")]
+            public CommunicationMode CommunicationMode8
+            {
+                get
+                {
+                    return commands[8].CommunicationMode;
+                }
+                set
+                {
+                    commands[8].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress8")]
             public string IPAddress8
             {
@@ -549,6 +656,19 @@ namespace CommandSender
             #endregion
 
             #region State9
+            [JsonProperty(PropertyName = "communicationMode9")]
+            public CommunicationMode CommunicationMode9
+            {
+                get
+                {
+                    return commands[9].CommunicationMode;
+                }
+                set
+                {
+                    commands[9].CommunicationMode = value;
+                }
+            }
+
             [JsonProperty(PropertyName = "ipAddress9")]
             public string IPAddress9
             {
@@ -612,6 +732,8 @@ namespace CommandSender
             public string CommandPressed { get; set; }
 
             public string CommandReleased { get; set; }
+
+            public CommunicationMode CommunicationMode { get; set; }
         }
 
 
@@ -620,7 +742,7 @@ namespace CommandSender
 
         private PluginSettings settings;
 
-        private UdpClient udpClient;
+        private ConnectionManager connectionManager;
 
         #endregion
         public PluginAction(SDConnection connection, InitialPayload payload) : base(connection, payload)
@@ -633,14 +755,14 @@ namespace CommandSender
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
-            udpClient = new UdpClient();
+            connectionManager = new ConnectionManager();
+            connectionManager.InitializeClients();
         }
 
         public override void Dispose()
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, $"Destructor called");
-            udpClient.Close();
-            udpClient.Dispose();
+            connectionManager.Dispose();
         }
 
         public override void KeyPressed(KeyPayload payload)
@@ -649,18 +771,7 @@ namespace CommandSender
 
             if(!string.IsNullOrEmpty(settings.CurrentCommandAction.CommandPressed) && !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) && settings.CurrentCommandAction.Port.HasValue)
             {
-                byte[] data = Encoding.ASCII.GetBytes(settings.CurrentCommandAction.CommandPressed);
-
-                try
-                {
-                    IPEndPoint ep = new IPEndPoint(IPAddress.Parse(settings.CurrentCommandAction.IPAddress), settings.CurrentCommandAction.Port.Value);
-                    udpClient.Connect(ep);
-                    udpClient.Send(data, data.Length);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
+                SendMessage(settings.CurrentCommandAction.CommandPressed, settings.CurrentCommandAction.CommunicationMode, settings.CurrentCommandAction.IPAddress, settings.CurrentCommandAction.Port.Value);
             }
         }
 
@@ -669,23 +780,17 @@ namespace CommandSender
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
             if(!string.IsNullOrEmpty(settings.CurrentCommandAction.CommandReleased) && !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) && settings.CurrentCommandAction.Port.HasValue)
             {
-                byte[] data = Encoding.ASCII.GetBytes(settings.CurrentCommandAction.CommandReleased);
-
-                try
-                {
-                    IPEndPoint ep = new IPEndPoint(IPAddress.Parse(settings.CurrentCommandAction.IPAddress), settings.CurrentCommandAction.Port.Value);
-                    udpClient.Connect(ep);
-                    udpClient.Send(data, data.Length);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
+                SendMessage(settings.CurrentCommandAction.CommandReleased, settings.CurrentCommandAction.CommunicationMode, settings.CurrentCommandAction.IPAddress, settings.CurrentCommandAction.Port.Value);
             }
             settings.CurrentState++;
             if(settings.CurrentState >= settings.DesiredStates)
                 settings.CurrentState = 0;
             SetStateAsync((uint)settings.CurrentState);
+        }
+
+        private void SendMessage(string message, CommunicationMode communicationMode, string ipAddress, int port)
+        {
+            connectionManager.SendMessage(communicationMode, ipAddress, port, message);
         }
 
         public override void OnTick() { }
