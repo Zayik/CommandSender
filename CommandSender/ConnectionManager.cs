@@ -12,7 +12,7 @@ namespace CommandSender
     internal class ConnectionManager
     {
         private UdpClient udpClient;
-        private Dictionary<string, TcpClient> tcpClients = new Dictionary<string, TcpClient>(10);
+        private static Dictionary<string, TcpClient> tcpClients = new Dictionary<string, TcpClient>(10);
 
         public void SendMessage(CommunicationMode communicationMode, string ipAddress, int port, string message, bool canRetry = true)
         {
