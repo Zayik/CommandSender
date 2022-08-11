@@ -5,7 +5,8 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
+
+using System.Web;
 
 namespace CommandSender
 {
@@ -16,7 +17,9 @@ namespace CommandSender
 
         public void SendMessage(CommunicationMode communicationMode, string ipAddress, int port, string message, bool canRetry = true)
         {
-            byte[] data = Encoding.ASCII.GetBytes(message);
+            var htmlDecodedMessage = HttpUtility.HtmlDecode(message);
+
+            byte[] data = Encoding.ASCII.GetBytes(htmlDecodedMessage);
             string tcpClientIdentifier = $"{ipAddress}::{port}";
 
             try
