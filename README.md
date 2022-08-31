@@ -41,7 +41,6 @@ Command Sender currently makes use of literal strings.
 This means, if you try to send "Hello\nWorld", it would appear as 
 "Hello\nWorld"
 
-
 Command Sender makes use of an html decoding that allows us to handle these special characters. 
 When looking at the string "Hello\nWorld", we have one special character being '\n'. 
 If we wanted to send this command in CommandSender with that newline character, we'd have to use its html encoding. 
@@ -50,6 +49,16 @@ Therefore, it changes from
 
 You can find special characters and their html encoding here: 
 https://www.ascii-code.com/
+
+
+To help illustrate the difference and how to handle special characters, consider two tools
+
+We want to send the following command "CC 8023 1 780 \r" where \r is a carriage return (Special character)
+Packet Sender uses regular string. So we send 
+CC 8023 1 780 \r
+
+Command Sender uses literal string and then uses html decoding for special characters Due to this, we need to convern the \r to the html encoding:
+CC 8023 1 780 &#13;
 
 
 # Test
