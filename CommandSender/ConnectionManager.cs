@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace CommandSender
@@ -17,9 +17,9 @@ namespace CommandSender
 
         public void SendMessage(CommunicationMode communicationMode, string ipAddress, int port, string message, bool canRetry = true)
         {
-            var htmlDecodedMessage = HttpUtility.HtmlDecode(message);
+            var decodedMessage = Regex.Unescape(message);
 
-            byte[] data = Encoding.ASCII.GetBytes(htmlDecodedMessage);
+            byte[] data = Encoding.ASCII.GetBytes(decodedMessage);
             string tcpClientIdentifier = $"{ipAddress}::{port}";
 
             try
