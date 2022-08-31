@@ -15,3 +15,17 @@
 
 # Test
  The UDPListener located at https://github.com/Zayik/UDPListener can be used to test if the plugin buttons are sending commands. 
+
+
+NOTE: Original implementation used an html decoding which required special characters to be listed with their html representation. 
+/n --> &#010;
+
+This is no longer required. 
+User should now be able to use special characters and have them processed appropriately. 
+This means sending "Hello\nWorld" will appear as 
+"Hello
+World"
+
+instead of 
+
+"Hello\nWorld"
