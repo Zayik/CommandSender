@@ -43,22 +43,23 @@ namespace CommandSender
                             IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
                             // Make sure connection is still peachy
                             TcpConnectionInformation[] tcpConnections = ipProperties.GetActiveTcpConnections().Where(x => x.LocalEndPoint.Equals(tcpClients[tcpClientIdentifier].Client.LocalEndPoint) && x.RemoteEndPoint.Equals(tcpClients[tcpClientIdentifier].Client.RemoteEndPoint)).ToArray();
-                            
+
+                            bool connectionGood = false;
                             if(tcpConnections != null && tcpConnections.Length > 0)
                             {
                                 TcpState stateOfConnection = tcpConnections.First().State;
                                 if(stateOfConnection == TcpState.Established)
                                 {
-                                    // Connection is OK
+                                    connectionGood = true;
                                 }
-                                else
-                                {
-                                    // No active tcp Connection to hostName:port
-                                    tcpClients[tcpClientIdentifier].Close();
-                                    tcpClients[tcpClientIdentifier].Dispose();
-                                    tcpClients[tcpClientIdentifier] = new TcpClient() { NoDelay = true };
-                                }
+                            }
 
+                            if(!connectionGood)
+                            {
+                                // No active tcp Connection to hostName:port
+                                tcpClients[tcpClientIdentifier].Close();
+                                tcpClients[tcpClientIdentifier].Dispose();
+                                tcpClients[tcpClientIdentifier] = new TcpClient() { NoDelay = true };
                             }
                         }
 
