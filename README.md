@@ -24,4 +24,5 @@ A: The most likely culprit is that there are multiple devices on the receiving n
 
 # Donate
 If this plugin has helped you out and you think it has value, feel free to send a donation of any amount. It's been a lot of fun working on this and I hope you all have enjoyed using it!
+
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=2CMZ24E89WANG&no_recurring=0&currency_code=USD)
