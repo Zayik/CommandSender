@@ -15,16 +15,25 @@ namespace CommandSender
         private UdpClient udpClient;
         private static Dictionary<string, TcpClient> tcpClients = new Dictionary<string, TcpClient>(10);
 
-        public void SendMessage(CommunicationMode communicationMode, string ipAddress, int port, string message, bool canRetry = true)
+        public void SendMessage(CommunicationMode communicationMode, string ipAddresses, int port, string message, bool canRetry = true)
         {
             var decodedMessage = Regex.Unescape(message);
 
             byte[] data = Encoding.ASCII.GetBytes(decodedMessage);
+
+            var tokens = ipAddresses.Split(';');
+            foreach(var ipAddress in tokens)
+            {
+                SendMessageToSingleIpAddress(communicationMode, ipAddress, port, data);
+            }
+        }
+
+        private void SendMessageToSingleIpAddress(CommunicationMode communicationMode, string ipAddress, int port, byte[] data)
+        {
             string tcpClientIdentifier = $"{ipAddress}::{port}";
 
             try
             {
-
                 IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ipAddress), port);
 
                 switch(communicationMode)
