@@ -56,14 +56,14 @@
         }
       ],
       "SupportedInMultiActions": true,
-      "Tooltip": "Command Sender for sending commands to servers via udp.",
+      "Tooltip": "Command Sender for sending commands to servers via udp or tcp.",
       "UUID": "com.biffmasterzay.commandsender",
       "PropertyInspectorPath": "PropertyInspector/PluginActionPI.html"
     }
   ],
   "Author": "BiffMasterZay",
   "Name": "CommandSender",
-  "Description": "Command Sender for sending commands to servers via udp.",
+  "Description": "Command Sender for sending commands to servers via udp or tcp.",
   "Icon": "Images/pluginIcon",
   "URL": "https://github.com/Zayik/CommandSender",
   "Version": "1.0",
