@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
+
 namespace CommandSender
 {
     internal class ConnectionManager
@@ -17,9 +18,11 @@ namespace CommandSender
 
         public void SendMessage(CommunicationMode communicationMode, string ipAddresses, int port, string message, bool canRetry = true)
         {
-            var decodedMessage = Regex.Unescape(message);
-
-            byte[] data = Encoding.ASCII.GetBytes(decodedMessage);
+            // Handle extended ascii characters
+            string pattern = @"\\x([8-9a-fA-F]{2})";
+            string output = Regex.Replace(message, pattern, match => ((char)Convert.ToInt32(match.Groups[1].Value, 16)).ToString());
+            var decodedMessage = Regex.Unescape(output);
+            byte[] data = Encoding.GetEncoding("latin1").GetBytes(decodedMessage);
 
             var tokens = ipAddresses.Split(';');
             foreach(var ipAddress in tokens)

@@ -19,7 +19,7 @@ REM Set the new variables using the current directory path
 set OUTPUT_DIR=!CURRENT_DIR!\Release
 set DISTRIBUTION_TOOL=!CURRENT_DIR!\DistributionTool.exe
 SET STREAM_DECK_FILE="C:\Program Files\Elgato\StreamDeck\StreamDeck.exe"
-SET STREAM_DECK_LOAD_TIMEOUT=7
+SET STREAM_DECK_LOAD_TIMEOUT=15
 
 taskkill /f /im streamdeck.exe
 taskkill /f /im %2.exe
@@ -27,7 +27,7 @@ timeout /t 2
 del %OUTPUT_DIR%\%2.streamDeckPlugin
 %DISTRIBUTION_TOOL% -b -i CommandSender/bin/Debug/%2.sdPlugin -o %OUTPUT_DIR%
 rmdir %APPDATA%\Elgato\StreamDeck\Plugins\%2.sdPlugin /s /q
-start %STREAM_DECK_FILE%
+start "" %STREAM_DECK_FILE%
 timeout /t %STREAM_DECK_LOAD_TIMEOUT%
 
 start %OUTPUT_DIR%\%2.streamDeckPlugin
