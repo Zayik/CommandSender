@@ -1,5 +1,5 @@
 # CommandSender
- Stream Deck plugin for sending UDP messages from a key press. 
+ Stream Deck plugin for sending UDP/TCP messages from a key press. 
 
 # Install
  Run the com.biffmasterzay.commandsender.streamDeckPlugin from the Release folder.
