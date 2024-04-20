@@ -13,6 +13,9 @@
 	Command Pressed: The message/command to send to the server on key press.
 	Command Released: The message/command to send to the server on key release.
 
+NOTE: You can also send characters via their hex notation /x?? where ?? represents the hexadecimal value listed in https://www.ascii-code.com/. 
+For example: /x0A represents a line feed character. 
+
 # Test
  The UDPListener located at https://github.com/Zayik/UDPListener can be used to test sending commands over UDP
  
