@@ -1,23 +1,17 @@
 ﻿using BarRaider.SdTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CommandSender
 {
-    [PluginActionId("com.biffmasterzay.commandsender")]
+    [PluginActionId("zayik.commandsender")]
     public class PluginAction : PluginBase
     {
-        
-
         readonly static int MAXSTATES = 10;
+        private bool keyPressedSuccessful = false;
         private class PluginSettings
         {
             PluginSettings()
@@ -34,7 +28,7 @@ namespace CommandSender
                 PluginSettings instance = new PluginSettings();
 
                 instance.commands = new List<CommandAction>(MAXSTATES);
-                for (int i = 0; i < MAXSTATES; i++)
+                for(int i = 0; i < MAXSTATES; i++)
                 {
                     instance.commands.Add(new CommandAction() { IPAddress = "127.0.0.1", Port = 45671 });
                 }
@@ -50,7 +44,7 @@ namespace CommandSender
             public CommandAction CurrentCommandAction { get { return commands[CurrentState]; } }
 
             [JsonProperty(PropertyName = "desiredStates")]
-            public int DesiredStates { get; set; }
+            public int DesiredStates { get; set; } = 1;
 
             #region State0
             [JsonProperty(PropertyName = "communicationMode0")]
@@ -159,7 +153,6 @@ namespace CommandSender
                 }
             }
 
-            [JsonProperty(PropertyName = "commandPressed1")]
             public string CommandPressed1
             {
                 get
@@ -755,6 +748,7 @@ namespace CommandSender
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
+
             connectionManager = new ConnectionManager();
             connectionManager.InitializeClients();
         }
@@ -768,32 +762,45 @@ namespace CommandSender
         public override void KeyPressed(KeyPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
-
+            keyPressedSuccessful = true;
             if(!string.IsNullOrEmpty(settings.CurrentCommandAction.CommandPressed) && !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) && settings.CurrentCommandAction.Port.HasValue)
             {
-                SendMessage(settings.CurrentCommandAction.CommandPressed, settings.CurrentCommandAction.CommunicationMode, settings.CurrentCommandAction.IPAddress, settings.CurrentCommandAction.Port.Value);
+                keyPressedSuccessful = SendMessage(settings.CurrentCommandAction.CommandPressed, settings.CurrentCommandAction.CommunicationMode, settings.CurrentCommandAction.IPAddress, settings.CurrentCommandAction.Port.Value);
             }
         }
 
         public override void KeyReleased(KeyPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
-            if(!string.IsNullOrEmpty(settings.CurrentCommandAction.CommandReleased) && !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) && settings.CurrentCommandAction.Port.HasValue)
+            if(keyPressedSuccessful && !string.IsNullOrEmpty(settings.CurrentCommandAction.CommandReleased) && !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) && settings.CurrentCommandAction.Port.HasValue)
             {
-                SendMessage(settings.CurrentCommandAction.CommandReleased, settings.CurrentCommandAction.CommunicationMode, settings.CurrentCommandAction.IPAddress, settings.CurrentCommandAction.Port.Value);
+                keyPressedSuccessful &= SendMessage(settings.CurrentCommandAction.CommandReleased, settings.CurrentCommandAction.CommunicationMode, settings.CurrentCommandAction.IPAddress, settings.CurrentCommandAction.Port.Value);
             }
-            settings.CurrentState++;
+
+            if(keyPressedSuccessful)
+            {
+                settings.CurrentState++;
+                if(settings.CurrentState >= settings.DesiredStates)
+                    settings.CurrentState = 0;
+                SetStateAsync((uint)settings.CurrentState);
+            }
+        }
+
+        private bool  SendMessage(string message, CommunicationMode communicationMode, string ipAddress, int port)
+        {
+            return connectionManager.SendMessage(communicationMode, ipAddress, port, message);
+        }
+
+        public override void OnTick()
+        {
             if(settings.CurrentState >= settings.DesiredStates)
+            {
                 settings.CurrentState = 0;
+                SaveSettings();
+            }
+
             SetStateAsync((uint)settings.CurrentState);
         }
-
-        private void SendMessage(string message, CommunicationMode communicationMode, string ipAddress, int port)
-        {
-            connectionManager.SendMessage(communicationMode, ipAddress, port, message);
-        }
-
-        public override void OnTick() { }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {

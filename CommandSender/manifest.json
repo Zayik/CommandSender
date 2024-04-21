@@ -2,7 +2,7 @@
   "Actions": [
     {
       "Icon": "Images/icon",
-      "Name": "CommandSender",
+      "Name": "Send Command",
       "States": [
         {
           "Image": "Images/pluginAction0",
@@ -56,19 +56,19 @@
         }
       ],
       "SupportedInMultiActions": true,
-      "Tooltip": "Command Sender for sending commands to servers via udp or tcp.",
-      "UUID": "com.biffmasterzay.commandsender",
+      "Tooltip": "Send custom UDP/TCP messages to a target IP and port with each button press. Each press can trigger a different action based on the plugin's current state, allowing for complex, multi-step workflows. Ideal for controlling networked devices or software in real-time.",
+      "UUID": "zayik.commandsender",
       "PropertyInspectorPath": "PropertyInspector/PluginActionPI.html"
     }
   ],
-  "Author": "BiffMasterZay",
+  "Author": "Zayik",
   "Name": "CommandSender",
-  "Description": "Command Sender for sending commands to servers via udp or tcp.",
+  "Description": "This plugin serves as a powerful and versatile tool for streamers and content creators, enabling them to send custom messages over both UDP and TCP protocols to a specified IP address and port. This functionality allows for real-time communication and control over networked devices or software, directly from the Stream Deck interface. In addition to its networking capabilities, the plugin features a stateful design. This means that each button press can trigger a different action based on the current state of the plugin. This allows users to create complex, multi-step workflows and interactions, all from a single button on their Stream Deck. Whether you're controlling lighting, managing your streaming software, or interacting with other networked devices, this plugin offers a level of customization and control that can significantly enhance your streaming setup and workflow.",
   "Icon": "Images/pluginIcon",
   "URL": "https://github.com/Zayik/CommandSender",
-  "Version": "1.0",
-  "CodePath": "com.biffmasterzay.commandsender",
-  "Category": "BiffMasterZay",
+  "Version": "1.3",
+  "CodePath": "zayik.commandsender",
+  "Category": "Command Sender",
   "CategoryIcon": "Images/categoryIcon",
   "OS": [
     {

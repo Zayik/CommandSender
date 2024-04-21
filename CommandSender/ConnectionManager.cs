@@ -6,7 +6,6 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 
 
 namespace CommandSender
@@ -16,7 +15,7 @@ namespace CommandSender
         private UdpClient udpClient;
         private static Dictionary<string, TcpClient> tcpClients = new Dictionary<string, TcpClient>(10);
 
-        public void SendMessage(CommunicationMode communicationMode, string ipAddresses, int port, string message, bool canRetry = true)
+        public bool SendMessage(CommunicationMode communicationMode, string ipAddresses, int port, string message, bool canRetry = true)
         {
             // Handle extended ascii characters
             string pattern = @"\\x([8-9a-fA-F]{2})";
@@ -24,16 +23,21 @@ namespace CommandSender
             var decodedMessage = Regex.Unescape(output);
             byte[] data = Encoding.GetEncoding("latin1").GetBytes(decodedMessage);
 
+            bool allMessagesSuccessful = true;
+
             var tokens = ipAddresses.Split(';');
             foreach(var ipAddress in tokens)
             {
-                SendMessageToSingleIpAddress(communicationMode, ipAddress, port, data);
+                allMessagesSuccessful &= SendMessageToSingleIpAddress(communicationMode, ipAddress, port, data);
             }
+
+            return allMessagesSuccessful;
         }
 
-        private void SendMessageToSingleIpAddress(CommunicationMode communicationMode, string ipAddress, int port, byte[] data)
+        private bool SendMessageToSingleIpAddress(CommunicationMode communicationMode, string ipAddress, int port, byte[] data)
         {
             string tcpClientIdentifier = $"{ipAddress}::{port}";
+            bool messageTransmitSuccessful = true;
 
             try
             {
@@ -108,7 +112,9 @@ namespace CommandSender
 
                 }
                 Console.WriteLine(ex.ToString());
+                messageTransmitSuccessful = false;
             }
+            return messageTransmitSuccessful;
         }
 
         public void InitializeClients()
