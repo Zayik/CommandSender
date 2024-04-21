@@ -1,1 +1,1 @@
-QuickInstallerLogic.bat %~dp0\CommandSender\bin\DEBUG com.biffmasterzay.commandsender
+QuickInstallerLogic.bat %~dp0\CommandSender\bin\DEBUG zayik.commandsender
