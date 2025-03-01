@@ -1,14 +1,12 @@
 ﻿using BarRaider.SdTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace CommandSender
 {
     [PluginActionId("zayik.commandsender")]
-    public class PluginAction : PluginBase
+    public class PluginAction : KeypadBase
     {
         readonly static int MAXSTATES = 10;
         private bool keyPressedSuccessful = false;
@@ -786,7 +784,7 @@ namespace CommandSender
             }
         }
 
-        private bool  SendMessage(string message, CommunicationMode communicationMode, string ipAddress, int port)
+        private bool SendMessage(string message, CommunicationMode communicationMode, string ipAddress, int port)
         {
             return connectionManager.SendMessage(communicationMode, ipAddress, port, message);
         }

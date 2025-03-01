@@ -1,137 +1,224 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using BarRaider.SdTools;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
-
 namespace CommandSender
 {
-    internal class ConnectionManager
+    internal class ConnectionManager : IDisposable
     {
         private UdpClient udpClient;
-        private static Dictionary<string, TcpClient> tcpClients = new Dictionary<string, TcpClient>(10);
+        private readonly TcpConnectionManager tcpConnectionManager;
+
+        public ConnectionManager()
+        {
+            InitializeClients();
+            tcpConnectionManager = new TcpConnectionManager();
+        }
 
         public bool SendMessage(CommunicationMode communicationMode, string ipAddresses, int port, string message, bool canRetry = true)
         {
-            // Handle extended ascii characters
+            // Handle extended ASCII characters
             string pattern = @"\\x([8-9a-fA-F]{2})";
             string output = Regex.Replace(message, pattern, match => ((char)Convert.ToInt32(match.Groups[1].Value, 16)).ToString());
             var decodedMessage = Regex.Unescape(output);
             byte[] data = Encoding.GetEncoding("latin1").GetBytes(decodedMessage);
 
             bool allMessagesSuccessful = true;
-
             var tokens = ipAddresses.Split(';');
+
             foreach(var ipAddress in tokens)
             {
-                allMessagesSuccessful &= SendMessageToSingleIpAddress(communicationMode, ipAddress, port, data);
+                allMessagesSuccessful &= communicationMode == CommunicationMode.Udp
+                    ? SendUdpMessage(ipAddress, port, data)
+                    : SendTcpMessage(ipAddress, port, data).GetAwaiter().GetResult(); // Using GetAwaiter for sync method
             }
 
             return allMessagesSuccessful;
         }
 
-        private bool SendMessageToSingleIpAddress(CommunicationMode communicationMode, string ipAddress, int port, byte[] data)
+        private bool SendUdpMessage(string ipAddress, int port, byte[] data)
         {
-            string tcpClientIdentifier = $"{ipAddress}::{port}";
-            bool messageTransmitSuccessful = true;
-
             try
             {
                 IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ipAddress), port);
-
-                switch(communicationMode)
-                {
-                    case CommunicationMode.Udp: // Udp
-                        udpClient.Connect(ep);
-                        udpClient.Send(data, data.Length);
-                        break;
-                    case CommunicationMode.Tcp: // Tcp
-                        if(!tcpClients.ContainsKey(tcpClientIdentifier))
-                        {
-                            tcpClients.Add(tcpClientIdentifier, new TcpClient() { NoDelay = true });
-                        }
-                        else
-                        {
-                            IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
-                            // Make sure connection is still peachy
-                            TcpConnectionInformation[] tcpConnections = ipProperties.GetActiveTcpConnections().Where(x => x.LocalEndPoint.Equals(tcpClients[tcpClientIdentifier].Client.LocalEndPoint) && x.RemoteEndPoint.Equals(tcpClients[tcpClientIdentifier].Client.RemoteEndPoint)).ToArray();
-
-                            bool connectionGood = false;
-                            if(tcpConnections != null && tcpConnections.Length > 0)
-                            {
-                                TcpState stateOfConnection = tcpConnections.First().State;
-                                if(stateOfConnection == TcpState.Established)
-                                {
-                                    connectionGood = true;
-                                }
-                            }
-
-                            if(!connectionGood)
-                            {
-                                // No active tcp Connection to hostName:port
-                                tcpClients[tcpClientIdentifier].Close();
-                                tcpClients[tcpClientIdentifier].Dispose();
-                                tcpClients[tcpClientIdentifier] = new TcpClient() { NoDelay = true };
-                            }
-                        }
-
-                        if(!tcpClients[tcpClientIdentifier].Connected)
-                        {
-                            tcpClients[tcpClientIdentifier].Connect(ep);
-                        }
-
-                        if(tcpClients[tcpClientIdentifier].Connected)
-                        {
-                            var tcpStream = tcpClients[tcpClientIdentifier].GetStream();
-                            tcpStream.Write(data, 0, data.Length);
-                        }
-
-                        break;
-                }
+                udpClient.Connect(ep);
+                udpClient.Send(data, data.Length);
+                return true;
             }
             catch(Exception ex)
             {
-                // In the event an issue occurred with the socket that would throw an error, ignore it and reset our tcp client. 
-                // The last thing we want is for the button to stop working.
-                if(communicationMode == CommunicationMode.Tcp)
-                {
-                    tcpClients[tcpClientIdentifier].Close();
-                    tcpClients[tcpClientIdentifier].Dispose();
-                    tcpClients[tcpClientIdentifier] = new TcpClient() { NoDelay = true };
-                }
-                else
-                {
-                    udpClient.Close();
-                    udpClient.Dispose();
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"UDP Send Error: {ex}");
 
-                    udpClient = new UdpClient();
-
-                }
-                Console.WriteLine(ex.ToString());
-                messageTransmitSuccessful = false;
+                udpClient.Close();
+                udpClient.Dispose();
+                udpClient = new UdpClient();
+                return false;
             }
-            return messageTransmitSuccessful;
+        }
+
+        private async Task<bool> SendTcpMessage(string ipAddress, int port, byte[] data)
+        {
+            string clientIdentifier = $"{ipAddress}::{port}";
+            return await tcpConnectionManager.SendTcpMessage(clientIdentifier, ipAddress, port, data);
         }
 
         public void InitializeClients()
         {
             udpClient = new UdpClient();
-            tcpClients = new Dictionary<string, TcpClient>();
         }
 
         public void Dispose()
         {
-            udpClient.Close();
-            udpClient.Dispose();
+            udpClient?.Close();
+            udpClient?.Dispose();
+            tcpConnectionManager?.Dispose();
+        }
+    }
 
-            foreach(var client in tcpClients.Values)
+    // TcpConnectionManager class from previous response
+    internal class TcpConnectionManager
+    {
+        private readonly Dictionary<string, TcpClientWrapper> tcpClients = new Dictionary<string, TcpClientWrapper>();
+        private readonly object lockObject = new object();
+
+        private class TcpClientWrapper
+        {
+            public TcpClient Client { get; set; }
+            public string HostName { get; set; }
+            public int Port { get; set; }
+            public bool IsConnecting { get; set; }
+        }
+
+        public async Task<bool> SendTcpMessage(string clientIdentifier, string hostName, int port, byte[] message)
+        {
+            TcpClientWrapper clientWrapper = GetOrCreateClient(clientIdentifier, hostName, port);
+
+            try
             {
-                client.Close();
-                client.Dispose();
+                if(!await EnsureConnection(clientWrapper))
+                {
+                    return false;
+                }
+
+                NetworkStream stream = clientWrapper.Client.GetStream();
+                await stream.WriteAsync(message, 0, message.Length);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Error sending TCP message: {ex.Message}");
+                await HandleDisconnection(clientWrapper);
+                return false;
+            }
+        }
+
+        private async Task<bool> EnsureConnection(TcpClientWrapper wrapper)
+        {
+            lock(lockObject)
+            {
+                if(wrapper.IsConnecting)
+                {
+                    return false;
+                }
+            }
+
+            if(IsConnected(wrapper.Client))
+            {
+                return true;
+            }
+
+            return await Reconnect(wrapper);
+        }
+
+        private async Task<bool> Reconnect(TcpClientWrapper wrapper)
+        {
+            lock(lockObject)
+            {
+                wrapper.IsConnecting = true;
+            }
+
+            try
+            {
+                wrapper.Client?.Close();
+                wrapper.Client?.Dispose();
+                wrapper.Client = new TcpClient { NoDelay = true };
+                var connectTask = wrapper.Client.ConnectAsync(wrapper.HostName, wrapper.Port);
+
+                if(await Task.WhenAny(connectTask, Task.Delay(5000)) == connectTask)
+                {
+                    await connectTask;
+                    return true;
+                }
+
+                return false;
+            }
+            catch(Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Connection attempt failed: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                lock(lockObject)
+                {
+                    wrapper.IsConnecting = false;
+                }
+            }
+        }
+
+        private bool IsConnected(TcpClient client)
+        {
+            if(client == null || !client.Connected)
+                return false;
+
+            try
+            {
+                return !(client.Client.Poll(1, SelectMode.SelectRead) && client.Client.Available == 0);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private TcpClientWrapper GetOrCreateClient(string identifier, string hostName, int port)
+        {
+            lock(lockObject)
+            {
+                if(!tcpClients.TryGetValue(identifier, out TcpClientWrapper wrapper))
+                {
+                    wrapper = new TcpClientWrapper
+                    {
+                        HostName = hostName,
+                        Port = port,
+                        Client = new TcpClient { NoDelay = true }
+                    };
+                    tcpClients[identifier] = wrapper;
+                }
+                return wrapper;
+            }
+        }
+
+        private async Task HandleDisconnection(TcpClientWrapper wrapper)
+        {
+            wrapper.Client?.Close();
+            wrapper.Client?.Dispose();
+            wrapper.Client = new TcpClient { NoDelay = true };
+            await Reconnect(wrapper);
+        }
+
+        public void Dispose()
+        {
+            lock(lockObject)
+            {
+                foreach(var client in tcpClients.Values)
+                {
+                    client.Client?.Close();
+                    client.Client?.Dispose();
+                }
+                tcpClients.Clear();
             }
         }
     }
