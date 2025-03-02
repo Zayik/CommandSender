@@ -1,8 +1,11 @@
 ﻿using BarRaider.SdTools;
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace CommandSender
 {
@@ -17,7 +20,10 @@ namespace CommandSender
             tcpConnectionManager = new TcpConnectionManager();
         }
 
-        public bool SendMessage(CommunicationMode communicationMode, string ipAddresses, int port, string message, bool canRetry = true)
+        /// <summary>
+        /// Sends a message to multiple IP addresses and returns success status along with any error messages.
+        /// </summary>
+        public (bool allSuccessful, List<string> errors) SendMessage(CommunicationMode communicationMode, string ipAddresses, int port, string message, bool canRetry = true)
         {
             // Handle extended ASCII characters
             string pattern = @"\\x([8-9a-fA-F]{2})";
@@ -26,39 +32,60 @@ namespace CommandSender
             byte[] data = Encoding.GetEncoding("latin1").GetBytes(decodedMessage);
 
             bool allMessagesSuccessful = true;
+            List<string> errors = new List<string>();
             var tokens = ipAddresses.Split(';');
 
             foreach(var ipAddress in tokens)
             {
-                allMessagesSuccessful &= communicationMode == CommunicationMode.Udp
-                    ? SendUdpMessage(ipAddress, port, data)
-                    : SendTcpMessage(ipAddress, port, data).GetAwaiter().GetResult(); // Using GetAwaiter for sync method
+                if(communicationMode == CommunicationMode.Udp)
+                {
+                    var (success, error) = SendUdpMessage(ipAddress, port, data);
+                    if(!success)
+                    {
+                        allMessagesSuccessful = false;
+                        errors.Add($"UDP to {ipAddress}:{port} - {error}");
+                    }
+                }
+                else
+                {
+                    var (success, error) = SendTcpMessage(ipAddress, port, data).GetAwaiter().GetResult(); // Synchronous call for simplicity
+                    if(!success)
+                    {
+                        allMessagesSuccessful = false;
+                        errors.Add($"TCP to {ipAddress}:{port} - {error}");
+                    }
+                }
             }
 
-            return allMessagesSuccessful;
+            return (allMessagesSuccessful, errors);
         }
 
-        private bool SendUdpMessage(string ipAddress, int port, byte[] data)
+        /// <summary>
+        /// Sends a UDP message and returns success status with error message if failed.
+        /// </summary>
+        private (bool success, string errorMessage) SendUdpMessage(string ipAddress, int port, byte[] data)
         {
             try
             {
                 IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ipAddress), port);
                 udpClient.Connect(ep);
                 udpClient.Send(data, data.Length);
-                return true;
+                return (true, null);
             }
             catch(Exception ex)
             {
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"UDP Send Error: {ex}");
-
                 udpClient.Close();
                 udpClient.Dispose();
                 udpClient = new UdpClient();
-                return false;
+                return (false, ex.Message); // Return the specific error message
             }
         }
 
-        private async Task<bool> SendTcpMessage(string ipAddress, int port, byte[] data)
+        /// <summary>
+        /// Sends a TCP message asynchronously and returns success status with error message if failed.
+        /// </summary>
+        private async Task<(bool success, string errorMessage)> SendTcpMessage(string ipAddress, int port, byte[] data)
         {
             string clientIdentifier = $"{ipAddress}::{port}";
             return await tcpConnectionManager.SendTcpMessage(clientIdentifier, ipAddress, port, data);
@@ -77,7 +104,6 @@ namespace CommandSender
         }
     }
 
-    // TcpConnectionManager class from previous response
     internal class TcpConnectionManager
     {
         private readonly Dictionary<string, TcpClientWrapper> tcpClients = new Dictionary<string, TcpClientWrapper>();
@@ -91,48 +117,65 @@ namespace CommandSender
             public bool IsConnecting { get; set; }
         }
 
-        public async Task<bool> SendTcpMessage(string clientIdentifier, string hostName, int port, byte[] message)
+        /// <summary>
+        /// Sends a TCP message and returns success status with error message if failed.
+        /// </summary>
+        public async Task<(bool success, string errorMessage)> SendTcpMessage(string clientIdentifier, string hostName, int port, byte[] message)
         {
             TcpClientWrapper clientWrapper = GetOrCreateClient(clientIdentifier, hostName, port);
 
             try
             {
-                if(!await EnsureConnection(clientWrapper))
+                string msg = Encoding.GetEncoding("latin1").GetString(message);
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Tcp Client sending message: {msg}.");
+
+                var (connectionSuccess, connectionError) = await EnsureConnection(clientWrapper);
+                if(!connectionSuccess)
                 {
-                    return false;
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"Connection not ensured: {connectionError}");
+                    return (false, connectionError);
                 }
 
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client getting stream.");
                 NetworkStream stream = clientWrapper.Client.GetStream();
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client sending message Start.");
                 await stream.WriteAsync(message, 0, message.Length);
-                return true;
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client sending message Complete.");
+                return (true, null);
             }
             catch(Exception ex)
             {
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"Error sending TCP message: {ex.Message}");
                 await HandleDisconnection(clientWrapper);
-                return false;
+                return (false, ex.Message); // Return the specific error message
             }
         }
 
-        private async Task<bool> EnsureConnection(TcpClientWrapper wrapper)
+        /// <summary>
+        /// Ensures a TCP connection is active, returning success status and error message if failed.
+        /// </summary>
+        private async Task<(bool success, string errorMessage)> EnsureConnection(TcpClientWrapper wrapper)
         {
             lock(lockObject)
             {
                 if(wrapper.IsConnecting)
                 {
-                    return false;
+                    return (false, "Another connection attempt is already in progress.");
                 }
             }
 
             if(IsConnected(wrapper.Client))
             {
-                return true;
+                return (true, null);
             }
 
             return await Reconnect(wrapper);
         }
 
-        private async Task<bool> Reconnect(TcpClientWrapper wrapper)
+        /// <summary>
+        /// Attempts to reconnect a TCP client, returning success status and error message if failed.
+        /// </summary>
+        private async Task<(bool success, string errorMessage)> Reconnect(TcpClientWrapper wrapper)
         {
             lock(lockObject)
             {
@@ -141,6 +184,8 @@ namespace CommandSender
 
             try
             {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Reconnecting.");
+
                 wrapper.Client?.Close();
                 wrapper.Client?.Dispose();
                 wrapper.Client = new TcpClient { NoDelay = true };
@@ -149,15 +194,17 @@ namespace CommandSender
                 if(await Task.WhenAny(connectTask, Task.Delay(5000)) == connectTask)
                 {
                     await connectTask;
-                    return true;
+                    return (true, null);
                 }
-
-                return false;
+                else
+                {
+                    return (false, "Connection timed out after 5 seconds.");
+                }
             }
             catch(Exception ex)
             {
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"Connection attempt failed: {ex.Message}");
-                return false;
+                return (false, ex.Message); // Return the specific error message
             }
             finally
             {
@@ -203,6 +250,8 @@ namespace CommandSender
 
         private async Task HandleDisconnection(TcpClientWrapper wrapper)
         {
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client Disconnecting.");
+
             wrapper.Client?.Close();
             wrapper.Client?.Dispose();
             wrapper.Client = new TcpClient { NoDelay = true };
@@ -211,6 +260,8 @@ namespace CommandSender
 
         public void Dispose()
         {
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client Disposing.");
+
             lock(lockObject)
             {
                 foreach(var client in tcpClients.Values)
