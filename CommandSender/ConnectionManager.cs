@@ -97,13 +97,22 @@ namespace CommandSender
 
             try
             {
+                string msg = Encoding.GetEncoding("latin1").GetString(message);
+
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Tcp Client sending message: {msg}.");
+
                 if(!await EnsureConnection(clientWrapper))
                 {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, "Connection not ensured. Returning false.");
+
                     return false;
                 }
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Tcp Client getting stream.");
 
                 NetworkStream stream = clientWrapper.Client.GetStream();
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Tcp Client sending message Start.");
                 await stream.WriteAsync(message, 0, message.Length);
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Tcp Client sending message Complete.");
                 return true;
             }
             catch(Exception ex)
@@ -141,6 +150,8 @@ namespace CommandSender
 
             try
             {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Reconnecting.");
+
                 wrapper.Client?.Close();
                 wrapper.Client?.Dispose();
                 wrapper.Client = new TcpClient { NoDelay = true };
@@ -203,6 +214,8 @@ namespace CommandSender
 
         private async Task HandleDisconnection(TcpClientWrapper wrapper)
         {
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client Disconnecting.");
+
             wrapper.Client?.Close();
             wrapper.Client?.Dispose();
             wrapper.Client = new TcpClient { NoDelay = true };
@@ -211,6 +224,8 @@ namespace CommandSender
 
         public void Dispose()
         {
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client Disposing.");
+
             lock(lockObject)
             {
                 foreach(var client in tcpClients.Values)

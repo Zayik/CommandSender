@@ -7,10 +7,11 @@
     <Deterministic>true</Deterministic>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <PlatformTarget>x64</PlatformTarget>
-    <Platforms>x64</Platforms> <!-- Add this -->
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier> <!-- Add this for explicit RID -->
+    <Platforms>x64</Platforms> <!-- Ensures x64 is the only platform -->
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath> <!-- Key change -->
+
     <!-- Assembly Info Attributes -->
     <AssemblyTitle>streamdeck-commandsender</AssemblyTitle>
     <AssemblyDescription>Sends a message to server via udp/tcp.</AssemblyDescription>
@@ -26,7 +27,8 @@
     <AssemblyTypeLibraryGuid>2954c354-66af-438e-9435-844151ff82b1</AssemblyTypeLibraryGuid>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <!-- Debug Configuration -->
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -35,7 +37,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <!-- Release Configuration -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\zayik.commandsender.sdPlugin\</OutputPath>
@@ -44,9 +47,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- NuGet Package References with Updated Versions -->
+    <!-- NuGet Package References -->
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NLog" Version="5.3.4" />
     <PackageReference Include="streamdeck-client-csharp" Version="4.3.0" />
     <PackageReference Include="StreamDeck-Tools" Version="6.3.1" />
   </ItemGroup>

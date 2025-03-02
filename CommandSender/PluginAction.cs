@@ -36,8 +36,6 @@ namespace CommandSender
 
             List<CommandAction> commands = new List<CommandAction>(10);
 
-            Dictionary<string, TcpClient> tcpClients = new Dictionary<string, TcpClient>();
-
             public int CurrentState = 0;
             public CommandAction CurrentCommandAction { get { return commands[CurrentState]; } }
 
@@ -151,6 +149,7 @@ namespace CommandSender
                 }
             }
 
+            [JsonProperty(PropertyName = "commandPressed1")]
             public string CommandPressed1
             {
                 get
