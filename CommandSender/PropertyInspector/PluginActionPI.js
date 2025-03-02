@@ -52,8 +52,8 @@ function displayError(errorMessage) {
     var errorMessages = document.getElementById("errorMessages");
     var errorEntry = document.createElement("p");
     errorEntry.textContent = new Date().toLocaleTimeString() + ": " + errorMessage;
-    errorMessages.appendChild(errorEntry);
-    errorMessages.scrollTop = errorMessages.scrollHeight;
+    errorMessages.insertBefore(errorEntry, errorMessages.firstChild); // Add to top
+    errorMessages.scrollTop = 0; // Scroll to top to show newest entry
 }
 
 function clearErrors() {

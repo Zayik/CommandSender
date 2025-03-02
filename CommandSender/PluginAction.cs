@@ -1,6 +1,8 @@
 ﻿using BarRaider.SdTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 
 namespace CommandSender
@@ -10,6 +12,7 @@ namespace CommandSender
     {
         readonly static int MAXSTATES = 10;
         private bool keyPressedSuccessful = false;
+
         private class PluginSettings
         {
             public PluginSettings()
@@ -416,13 +419,9 @@ namespace CommandSender
         public class CommandAction
         {
             public string IPAddress { get; set; }
-
             public int? Port { get; set; }
-
             public string CommandPressed { get; set; }
-
             public string CommandReleased { get; set; }
-
             public CommunicationMode CommunicationMode { get; set; }
         }
 
@@ -450,7 +449,7 @@ namespace CommandSender
 
         public override void Dispose()
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"Destructor called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Destructor called");
             connectionManager.Dispose();
         }
 
@@ -462,14 +461,20 @@ namespace CommandSender
                 !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) &&
                 settings.CurrentCommandAction.Port.HasValue)
             {
-                keyPressedSuccessful = SendMessage(settings.CurrentCommandAction.CommandPressed,
-                                                  settings.CurrentCommandAction.CommunicationMode,
-                                                  settings.CurrentCommandAction.IPAddress,
-                                                  settings.CurrentCommandAction.Port.Value);
-                if(!keyPressedSuccessful)
+                var (allSuccessful, errors) = connectionManager.SendMessage(
+                    settings.CurrentCommandAction.CommunicationMode,
+                    settings.CurrentCommandAction.IPAddress,
+                    settings.CurrentCommandAction.Port.Value,
+                    settings.CurrentCommandAction.CommandPressed);
+
+                keyPressedSuccessful = allSuccessful;
+                if(!allSuccessful)
                 {
-                    var errorPayload = new { error = $"Connection failed for State {settings.CurrentState} (Pressed) at {settings.CurrentCommandAction.IPAddress}:{settings.CurrentCommandAction.Port}" };
-                    Connection.SendToPropertyInspectorAsync(JObject.FromObject(errorPayload));
+                    foreach(var error in errors)
+                    {
+                        var errorPayload = new { error = $"State {settings.CurrentState} (Pressed): {error}" };
+                        Connection.SendToPropertyInspectorAsync(JObject.FromObject(errorPayload));
+                    }
                 }
             }
         }
@@ -482,14 +487,20 @@ namespace CommandSender
                 !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) &&
                 settings.CurrentCommandAction.Port.HasValue)
             {
-                keyPressedSuccessful = SendMessage(settings.CurrentCommandAction.CommandReleased,
-                                                  settings.CurrentCommandAction.CommunicationMode,
-                                                  settings.CurrentCommandAction.IPAddress,
-                                                  settings.CurrentCommandAction.Port.Value);
-                if(!keyPressedSuccessful)
+                var (allSuccessful, errors) = connectionManager.SendMessage(
+                    settings.CurrentCommandAction.CommunicationMode,
+                    settings.CurrentCommandAction.IPAddress,
+                    settings.CurrentCommandAction.Port.Value,
+                    settings.CurrentCommandAction.CommandReleased);
+
+                keyPressedSuccessful = allSuccessful;
+                if(!allSuccessful)
                 {
-                    var errorPayload = new { error = $"Connection failed for State {settings.CurrentState} (Released) at {settings.CurrentCommandAction.IPAddress}:{settings.CurrentCommandAction.Port}" };
-                    Connection.SendToPropertyInspectorAsync(JObject.FromObject(errorPayload));
+                    foreach(var error in errors)
+                    {
+                        var errorPayload = new { error = $"State {settings.CurrentState} (Released): {error}" };
+                        Connection.SendToPropertyInspectorAsync(JObject.FromObject(errorPayload));
+                    }
                 }
             }
 
@@ -500,11 +511,6 @@ namespace CommandSender
                     settings.CurrentState = 0;
                 SetStateAsync((uint)settings.CurrentState);
             }
-        }
-
-        private bool SendMessage(string message, CommunicationMode communicationMode, string ipAddress, int port)
-        {
-            return connectionManager.SendMessage(communicationMode, ipAddress, port, message);
         }
 
         public override void OnTick()
