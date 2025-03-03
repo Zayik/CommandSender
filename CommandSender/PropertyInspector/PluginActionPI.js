@@ -44,6 +44,9 @@ function connectElgatoStreamDeckSocketExtension(websocket) {
             if(payload.error) {
                 displayError(payload.error);
             }
+            else if(payload.errorLog) {
+                loadErrorLog(payload.errorLog); // Initial log load
+            }
         }
     });
 }
@@ -51,11 +54,26 @@ function connectElgatoStreamDeckSocketExtension(websocket) {
 function displayError(errorMessage) {
     var errorMessages = document.getElementById("errorMessages");
     var errorEntry = document.createElement("p");
-    errorEntry.textContent = new Date().toLocaleTimeString() + ": " + errorMessage;
+    errorEntry.textContent = errorMessage;
     errorMessages.insertBefore(errorEntry, errorMessages.firstChild); // Add to top
-    errorMessages.scrollTop = 0; // Scroll to top to show newest entry
+    errorMessages.scrollTop = 0; // Scroll to top
+}
+
+function loadErrorLog(logEntries) {
+    var errorMessages = document.getElementById("errorMessages");
+    errorMessages.innerHTML = ""; // Clear existing entries
+    // Reverse the order so newest (index 0) is added last and ends up at the top
+    var reversedEntries = logEntries.slice().reverse();
+    reversedEntries.forEach(entry => {
+        var errorEntry = document.createElement("p");
+        errorEntry.textContent = entry;
+        errorMessages.insertBefore(errorEntry, errorMessages.firstChild); // Add in reverse order
+    });
+    errorMessages.scrollTop = 0; // Ensure top is visible
 }
 
 function clearErrors() {
     document.getElementById("errorMessages").innerHTML = "";
+
+    sendValueToPlugin("clearErrorLog", "clearErrorLog")
 }

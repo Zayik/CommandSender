@@ -1,9 +1,10 @@
 ﻿using BarRaider.SdTools;
+using BarRaider.SdTools.Events;
+using BarRaider.SdTools.Wrappers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 
 namespace CommandSender
 {
@@ -22,28 +23,30 @@ namespace CommandSender
                 {
                     commands.Add(new CommandAction());
                 }
+                ErrorLog = new List<string>();
             }
 
             public static PluginSettings CreateDefaultSettings()
             {
                 PluginSettings instance = new PluginSettings();
-
                 instance.commands = new List<CommandAction>(MAXSTATES);
                 for(int i = 0; i < MAXSTATES; i++)
                 {
                     instance.commands.Add(new CommandAction() { IPAddress = "127.0.0.1", Port = 45671 });
                 }
-
+                instance.ErrorLog = new List<string>();
                 return instance;
             }
 
             List<CommandAction> commands = new List<CommandAction>(10);
-
             public int CurrentState = 0;
             public CommandAction CurrentCommandAction { get { return commands[CurrentState]; } }
 
             [JsonProperty(PropertyName = "desiredStates")]
             public int DesiredStates { get; set; } = 1;
+
+            [JsonProperty(PropertyName = "errorLog")]
+            public List<string> ErrorLog { get; set; }
 
             #region State0
             [JsonProperty(PropertyName = "communicationMode0")]
@@ -429,6 +432,7 @@ namespace CommandSender
 
         private PluginSettings settings;
         private ConnectionManager connectionManager;
+        private bool releaseShouldAdvanceState;
 
         #endregion
 
@@ -445,6 +449,27 @@ namespace CommandSender
 
             connectionManager = new ConnectionManager();
             connectionManager.InitializeClients();
+            releaseShouldAdvanceState = false;
+
+            // Send initial log to Property Inspector when it connects
+            Connection.OnPropertyInspectorDidAppear += (s, e) =>
+            {
+                SendErrorLogToPropertyInspector();
+            };
+
+            // Handle messages from Property Inspector
+            Connection.OnSendToPlugin += Connection_OnSendToPlugin;
+        }
+
+        private void Connection_OnSendToPlugin(object sender, SDEventReceivedEventArgs<SendToPlugin> args)
+        {
+            var payload = args.Event.Payload;
+            if(payload.TryGetValue("clearErrorLog", out var action) && action.ToString() == "clearErrorLog")
+            {
+                settings.ErrorLog.Clear();
+                SaveSettings(); // Persist settings with cleared log
+                SendErrorLogToPropertyInspector(); // Update Property Inspector
+            }
         }
 
         public override void Dispose()
@@ -457,6 +482,7 @@ namespace CommandSender
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
             keyPressedSuccessful = true;
+
             if(!string.IsNullOrEmpty(settings.CurrentCommandAction.CommandPressed) &&
                 !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) &&
                 settings.CurrentCommandAction.Port.HasValue)
@@ -472,16 +498,23 @@ namespace CommandSender
                 {
                     foreach(var error in errors)
                     {
-                        var errorPayload = new { error = $"State {settings.CurrentState} (Pressed): {error}" };
+                        string errorMsg = $"{DateTime.Now.ToString("HH:mm:ss")} - State {settings.CurrentState} (Pressed): {error}";
+                        settings.ErrorLog.Insert(0, errorMsg);
+                        var errorPayload = new { error = errorMsg };
                         Connection.SendToPropertyInspectorAsync(JObject.FromObject(errorPayload));
                     }
+                    SaveSettings();
                 }
             }
+
+            releaseShouldAdvanceState = keyPressedSuccessful;
         }
 
         public override void KeyReleased(KeyPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
+            bool releaseSuccessful = true;
+
             if(keyPressedSuccessful &&
                 !string.IsNullOrEmpty(settings.CurrentCommandAction.CommandReleased) &&
                 !string.IsNullOrEmpty(settings.CurrentCommandAction.IPAddress) &&
@@ -493,18 +526,21 @@ namespace CommandSender
                     settings.CurrentCommandAction.Port.Value,
                     settings.CurrentCommandAction.CommandReleased);
 
-                keyPressedSuccessful = allSuccessful;
+                releaseSuccessful = allSuccessful;
                 if(!allSuccessful)
                 {
                     foreach(var error in errors)
                     {
-                        var errorPayload = new { error = $"State {settings.CurrentState} (Released): {error}" };
+                        string errorMsg = $"{DateTime.Now.ToString("HH:mm:ss")} - State {settings.CurrentState} (Released): {error}";
+                        settings.ErrorLog.Insert(0, errorMsg);
+                        var errorPayload = new { error = errorMsg };
                         Connection.SendToPropertyInspectorAsync(JObject.FromObject(errorPayload));
                     }
+                    SaveSettings();
                 }
             }
 
-            if(keyPressedSuccessful)
+            if(releaseShouldAdvanceState && releaseSuccessful)
             {
                 settings.CurrentState++;
                 if(settings.CurrentState >= settings.DesiredStates)
@@ -528,6 +564,7 @@ namespace CommandSender
         {
             Tools.AutoPopulateSettings(settings, payload.Settings);
             SaveSettings();
+            SendErrorLogToPropertyInspector();
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
@@ -542,6 +579,12 @@ namespace CommandSender
         private Task SetStateAsync(uint state)
         {
             return Connection.SetStateAsync(state);
+        }
+
+        private void SendErrorLogToPropertyInspector()
+        {
+            var logPayload = new { errorLog = settings.ErrorLog };
+            Connection.SendToPropertyInspectorAsync(JObject.FromObject(logPayload));
         }
 
         #endregion
