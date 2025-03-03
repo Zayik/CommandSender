@@ -6,9 +6,9 @@ namespace CommandSender
     {
         static void Main(string[] args)
         {
-            // Uncomment this line of code to allow for debugging
+            // UIncomment to enable debugging. Note that this will prevent the plugin from running in Stream Deck until a debugger is attached.
             //while (!System.Diagnostics.Debugger.IsAttached) { System.Threading.Thread.Sleep(100); }
-
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Plugin starting");
             SDWrapper.Run(args);
         }
     }

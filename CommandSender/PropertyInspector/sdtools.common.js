@@ -24,7 +24,13 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
     var event = new Event('websocketCreate');
     document.dispatchEvent(event);
 
+    connectElgatoStreamDeckSocketExtension(websocket)
+
     loadConfiguration(actionInfo.payload.settings);
+}
+
+function connectElgatoStreamDeckSocketExtension(websocket) {
+
 }
 
 function websocketOnOpen() {

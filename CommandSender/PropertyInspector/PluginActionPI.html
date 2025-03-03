@@ -9,13 +9,23 @@
     <link rel="stylesheet" href="sdpi.css">
     <script src="sdtools.common.js"></script>
     <script src="PluginActionPI.js"></script>
+    <style>
+        #errorLog {
+            color: red;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="sdpi-wrapper">
         <div class="sdpi-item" id="dvTitlePrefix">
-                <div class="sdpi-item-label">Desired States (Max 10)</div>
-                <input class="sdpi-item-value sdProperty" type="number" placeholder="1" value="1" id="desiredStates" min="1" max="10" pattern="[0-9]{1,2}" onchange="setdesiredState()">
-            </div>
+            <div class="sdpi-item-label">Desired States (Max 10)</div>
+            <input class="sdpi-item-value sdProperty" type="number" placeholder="1" value="1" id="desiredStates" min="1" max="10" pattern="[0-9]{1,2}" onchange="setdesiredState()">
+        </div>
 
         <div id="State0">
             <br>------------------------------State0------------------------------</br>
@@ -43,12 +53,12 @@
                 <input class="sdpi-item-value sdProperty" placeholder="CommandReleased" value="" id="commandReleased0" oninput="setSettings()">
             </div>
         </div>
-        
+
         <div id="State1" style="display: none">
             <br>------------------------------State1------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select sdProperty" id="communicationMode1" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode1" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -59,7 +69,7 @@
             </div>
             <div class="sdpi-item" id="dvTitlePrefix">
                 <div class="sdpi-item-label">Port</div>
-                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port1" onchange="validatePort(port1)"">
+                <input class="sdpi-item-value sdProperty" type="number" placeholder="45671" value="45671" id="port1" onchange="validatePort(port1)">
             </div>
             <div class="sdpi-item" id="dvTitlePrefix">
                 <div class="sdpi-item-label">Command Pressed</div>
@@ -75,7 +85,7 @@
             <br>------------------------------State2------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select" id="CommunicationMode2" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode2" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -102,7 +112,7 @@
             <br>------------------------------State3------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select" id="CommunicationMode3" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode3" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -129,7 +139,7 @@
             <br>------------------------------State4------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select" id="CommunicationMode4" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode4" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -156,7 +166,7 @@
             <br>------------------------------State5------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select" id="CommunicationMode5" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode5" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -183,7 +193,7 @@
             <br>------------------------------State6------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select" id="CommunicationMode6" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode6" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -210,7 +220,7 @@
             <br>------------------------------State7------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select" id="CommunicationMode7" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode7" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -237,7 +247,7 @@
             <br>------------------------------State8------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select" id="CommunicationMode8" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode8" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -264,7 +274,7 @@
             <br>------------------------------State9------------------------------</br>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Communication Type</div>
-                <select class="sdpi-item-value select" id="CommunicationMode9" oninput="updateSettings()">
+                <select class="sdpi-item-value select sdProperty" id="communicationMode9" oninput="setSettings()">
                     <option type="number" value="0">Udp</option>
                     <option type="number" value="1">Tcp</option>
                 </select>
@@ -287,6 +297,12 @@
             </div>
         </div>
 
+        <!-- Error Log Section -->
+        <div id="errorLog" style="display: none">
+            <h3>TCP Connection Issues</h3>
+            <div id="errorMessages"></div>
+            <button onclick="clearErrors()">Clear Log</button>
+        </div>
     </div>
 </body>
 </html>
