@@ -21,8 +21,8 @@
     <AssemblyCopyright>Copyright © 2019</AssemblyCopyright>
     <AssemblyTrademark></AssemblyTrademark>
     <AssemblyCulture></AssemblyCulture>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.4.0.0</AssemblyVersion>
+    <FileVersion>1.4.0.0</FileVersion>
     <ComVisible>false</ComVisible>
     <AssemblyTypeLibraryGuid>2954c354-66af-438e-9435-844151ff82b1</AssemblyTypeLibraryGuid>
   </PropertyGroup>
