@@ -14,13 +14,30 @@ function updateStateVisibilityOnChange() {
 }
 
 function updateStateVisibility(desiredStates) {
+    var showErrorLog = false;
     for(var i = 0; i < desiredStates; i++) {
         var stateId = "State" + i;
         document.getElementById(stateId).style.display = 'inline';
+
+        var comMode = "communicationMode" + i;
+        var ele = document.getElementById(comMode);
+
+        if(ele.value == 1) {
+            showErrorLog = true;
+        }
     }
+
     for(var i = desiredStates; i < 10; i++) {
         var stateId = "State" + i;
         document.getElementById(stateId).style.display = 'none';
+    }
+
+    if(showErrorLog) {
+        document.getElementById("errorLog").style.display = "";
+    }
+    else {
+        document.getElementById("errorLog").style.display = 'none';
+
     }
 }
 
