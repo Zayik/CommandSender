@@ -68,7 +68,10 @@ namespace CommandSender
             try
             {
                 IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ipAddress), port);
+
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Udp connect being made.");
                 udpClient.Connect(ep);
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Udp sending message {data}.");
                 udpClient.Send(data, data.Length);
                 return (true, null);
             }
@@ -120,7 +123,7 @@ namespace CommandSender
         /// <summary>
         /// Sends a TCP message and returns success status with error message if failed.
         /// </summary>
-        public async Task<(bool success, string errorMessage)> SendTcpMessage(string clientIdentifier, string hostName, int port, byte[] message)
+        public async Task<(bool success, string? errorMessage)> SendTcpMessage(string clientIdentifier, string hostName, int port, byte[] message)
         {
             TcpClientWrapper clientWrapper = GetOrCreateClient(clientIdentifier, hostName, port);
 
@@ -138,9 +141,9 @@ namespace CommandSender
 
                 Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client getting stream.");
                 NetworkStream stream = clientWrapper.Client.GetStream();
-                Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client sending message Start.");
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Tcp Client attempting to send message.");
                 await stream.WriteAsync(message, 0, message.Length);
-                Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client sending message Complete.");
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Tcp Client successfully sent message.");
                 return (true, null);
             }
             catch(Exception ex)

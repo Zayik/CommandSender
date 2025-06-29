@@ -6,8 +6,6 @@
     <AssemblyName>zayik.commandsender</AssemblyName>
     <Deterministic>true</Deterministic>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <PlatformTarget>x64</PlatformTarget>
-    <Platforms>x64</Platforms> <!-- Ensures x64 is the only platform -->
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath> <!-- Key change -->
@@ -21,8 +19,8 @@
     <AssemblyCopyright>Copyright © 2019</AssemblyCopyright>
     <AssemblyTrademark></AssemblyTrademark>
     <AssemblyCulture></AssemblyCulture>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <FileVersion>1.4.0.0</FileVersion>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
     <ComVisible>false</ComVisible>
     <AssemblyTypeLibraryGuid>2954c354-66af-438e-9435-844151ff82b1</AssemblyTypeLibraryGuid>
   </PropertyGroup>
